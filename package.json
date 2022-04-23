@@ -1,0 +1,31 @@
+{
+  "name": "cnuebred/bee",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/index.js",
+  "types": "build/d.js",
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "dev": "nodemon --watch . --ext ts,json,bee,js --exec npx ts-node src/app.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cnuebred/bee.ts.git"
+  },
+  "author": "cnuebred",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cnuebred/bee.ts/issues"
+  },
+  "homepage": "https://github.com/cnuebred/bee.ts#readme",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "fs": "^0.0.1-security",
+    "typescript": "^4.6.3"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.25"
+  }
+}
