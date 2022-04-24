@@ -1,11 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
-const bee_1 = require("./bee");
-const scripts_1 = require("./scripts");
+const cnuebred_bee_1 = require("cnuebred_bee");
 const app = () => {
-    const bee = new bee_1.Bee('readme');
-    bee.pushBee((0, scripts_1.base_style)());
+    const bee = new cnuebred_bee_1.Bee('readme');
+    bee.pushBee(cnuebred_bee_1.scheme.base_style());
     bee.add('Hello Cube', 'h3#header.nick');
     bee.add('Here is b(some) description', 'p');
     const hr = bee.add('', 'hr');

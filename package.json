@@ -1,6 +1,6 @@
 {
   "name": "cnuebred_bee",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "build/index.js",
   "types": "build/d.js",
@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/cnuebred/bee.ts#readme",
   "dependencies": {
-    "cnuebred_bee": "^1.0.0",
+    "cnuebred_bee": "^1.0.1",
     "crypto": "^1.0.1",
     "fs": "^0.0.1-security",
     "typescript": "^4.6.3"
