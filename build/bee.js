@@ -121,7 +121,7 @@ class Bee {
         };
         this.defaultScriptsFunctions = () => {
             const defaultScript = [];
-            defaultScript.push(`<script>const bee_global_functions_${this.name} = {${Object.entries(this.functions)
+            defaultScript.push(`<script build_in="foo">const bee_global_functions_${this.name} = {${Object.entries(this.functions)
                 .map(([key, value]) => {
                 return `${key}: ${value.toString()}`;
             })
@@ -142,7 +142,7 @@ class Bee {
             Object.entries(const_1.defaultEventActions).forEach(([key, value]) => {
                 const elements = `document.querySelectorAll('[${key}]')`;
                 const event_foo = `(el) => {bee_global_functions_${this.name}['${this.prefixFoo}'+ attr](item, el)}`;
-                defaultScript.push(`<script>${elements}.forEach(item => {const attr = item.getAttribute('${key}');item.addEventListener('${value}', ${event_foo})})</script>`);
+                defaultScript.push(`<script build_in="event">${elements}.forEach(item => {const attr = item.getAttribute('${key}');item.addEventListener('${value}', ${event_foo})})</script>; `);
             });
             return defaultScript;
         };

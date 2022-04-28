@@ -127,7 +127,7 @@ export class Bee {
     private defaultScriptsFunctions = () => {
         const defaultScript: string[] = []
         defaultScript.push(
-            `<script>const bee_global_functions_${this.name} = {${Object.entries(this.functions)
+            `<script build_in="foo">const bee_global_functions_${this.name} = {${Object.entries(this.functions)
                 .map(([key, value]) => {
                     return `${key}: ${value.toString()}`
                 })
@@ -155,7 +155,7 @@ export class Bee {
             const elements = `document.querySelectorAll('[${key}]')`
             const event_foo = `(el) => {bee_global_functions_${this.name}['${this.prefixFoo}'+ attr](item, el)}`
             defaultScript.push(
-                `<script>${elements}.forEach(item => {const attr = item.getAttribute('${key}');item.addEventListener('${value}', ${event_foo})})</script>`
+                `<script build_in="event">${elements}.forEach(item => {const attr = item.getAttribute('${key}');item.addEventListener('${value}', ${event_foo})})</script>; `
             )
         })
 

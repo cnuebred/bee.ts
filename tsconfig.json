@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "declaration": true,
         "target": "ES2021",
         "experimentalDecorators": true,
         "module": "commonjs",
@@ -13,6 +14,7 @@
         "./src/**/*.ts",
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "src/app.ts"
     ]
 }
