@@ -41,6 +41,7 @@ class Component {
             new_ += this.componentString.replaceAll(const_1.regex.loop_item, (match, p1) => replacer(match, p1, item));
         });
         this.componentString = new_;
+        return this;
     }
     pre(component) {
         this.component_.splice(0, 0, component);
@@ -142,7 +143,7 @@ class Bee {
             Object.entries(const_1.defaultEventActions).forEach(([key, value]) => {
                 const elements = `document.querySelectorAll('[${key}]')`;
                 const event_foo = `(el) => {bee_global_functions_${this.name}['${this.prefixFoo}'+ attr](item, el)}`;
-                defaultScript.push(`<script build_in="event">${elements}.forEach(item => {const attr = item.getAttribute('${key}');item.addEventListener('${value}', ${event_foo})})</script>; `);
+                defaultScript.push(`<script build_in="event">${elements}.forEach(item => {const attr = item.getAttribute('${key}');item.addEventListener('${value}', ${event_foo})})</script>`);
             });
             return defaultScript;
         };
