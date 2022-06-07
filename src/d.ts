@@ -46,7 +46,8 @@ export type CssProperties =
     'transformOrigin' | 'transformStyle' | 'transition' | 'transitionDelay' | 'transitionDuration' |
     'transitionProperty' | 'transitionTimingFunction' | 'unicodeBidi' | 'userSelect' | 'verticalAlign' |
     'visibility' | 'whiteSpace' | 'widows' | 'width' | 'wordBreak' | 'wordSpacing' |
-    'wordWrap' | 'writingMode' | 'zIndex'
+    'wordWrap' | 'writingMode' | 'zIndex' | '-webkit-touch-callout' | '-webkit-user-select' | '-khtml-user-select'
+    | '-moz-user-select' | '-ms-user-select'
 
 
 
