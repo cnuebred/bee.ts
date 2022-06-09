@@ -5,8 +5,14 @@ const blog_style = (): Hive => {
     .style('hr', { border: 'solid #1e2124 1.75px', background: '#1e2124', borderRadius: '10px' })
     .style('body', { margin: '0px' })
 
-  hive.add(`@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400&display=swap');
-    body{font-family: 'Montserrat', sans-serif;}`, 'style')
+  hive.add('', 'link', { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/monokai.min.css' })
+  // hive.add(`@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400&display=swap');
+  //   body{font-family: 'Montserrat', sans-serif;}`, 'style')
+  hive.style('body,button', {
+    fontFamily: 'ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace',
+  })
+  hive.add('', 'script', { src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js' })
+  hive.add('hljs.initHighlightingOnLoad()', 'script')
 
   hive.style('::-webkit-scrollbar', { width: '7.5px', height: '7.5px' })
   hive.style('::-webkit-scrollbar-track', { background: '#f1f1f1', borderRadius: '2px' })
@@ -57,7 +63,43 @@ const blog_style = (): Hive => {
     '-ms-user-select': 'none',
     userSelect: 'none'
   })
-
+  hive.style('select', {
+    outline: 'none',
+    padding: '3.5px',
+    paddingLeft: '15px',
+    paddingRight: '15px',
+    borderRadius: '3px',
+    border: 'none',
+    overflow: 'hidden',
+    appearance: 'none',
+    cursor: 'pointer',
+    background: '#d8d8d8',
+    transition: 'opacity 0.1s ease'
+  })
+  hive.style('select:hover', {
+    opacity: '0.8'
+  })
+  hive.style('blockquote', {
+    padding: '3px',
+    marginLeft: '0',
+    paddingLeft: '25px',
+    paddingRight: '4.5px',
+    borderRadius: '2px',
+    borderLeft: 'solid #1e2124 3px'
+  })
+  hive.style('button', {
+    outline: 'none',
+    textDecoration: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'opacity 0.1s ease'
+  })
+  hive.style('button:hover', {
+    opacity: '0.8'
+  })
+  hive.style('button:active', {
+    opacity: '0.2',
+  })
   return hive
 }
 export const bee_package: { [index: string]: any } = {

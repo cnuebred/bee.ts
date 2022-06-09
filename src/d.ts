@@ -47,7 +47,7 @@ export type CssProperties =
     'transitionProperty' | 'transitionTimingFunction' | 'unicodeBidi' | 'userSelect' | 'verticalAlign' |
     'visibility' | 'whiteSpace' | 'widows' | 'width' | 'wordBreak' | 'wordSpacing' |
     'wordWrap' | 'writingMode' | 'zIndex' | '-webkit-touch-callout' | '-webkit-user-select' | '-khtml-user-select'
-    | '-moz-user-select' | '-ms-user-select'
+    | '-moz-user-select' | '-ms-user-select' | 'appearance'
 
 
 
