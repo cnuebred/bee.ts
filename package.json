@@ -1,9 +1,9 @@
 {
   "name": "cnuebred_bee",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "main": "build/hive.js",
+  "types": "build/hive.d.ts",
   "files": [
     "build"
   ],
@@ -11,7 +11,7 @@
     "dev": "npm run hive",
     "hive": "nodemon --watch . --ext ts,json,bee,js --exec npx ts-node src/app.ts",
     "wss": "nodemon --watch wss.ts --ext ts,json,bee,js --exec npx ts-node ./wss.ts",
-    "build": "npx tsc && jsmin -o name.min.js build/hive.js"
+    "build": "npx tsc && jsmin -o build/hive.min.js build/hive.js"
   },
   "repository": {
     "type": "git",
@@ -25,7 +25,6 @@
   "homepage": "https://github.com/cnuebred/bee.ts#readme",
   "dependencies": {
     "@types/ws": "^8.5.3",
-    "cnuebred_bee": "^1.0.2",
     "crypto": "^1.0.1",
     "fs": "^0.0.1-security",
     "jsmin": "^1.0.1",

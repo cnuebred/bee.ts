@@ -3,4 +3,4 @@ node_modules
 index.html
 src/app.ts
 build
-wss.ts
+app.js

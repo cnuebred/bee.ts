@@ -1,9 +1,3 @@
-export type ComponentOptions = {
-    nonparse?: boolean
-    ignore?: boolean
-}
-
-export type Book<T> = { [index: string]: T }
 export type CssProperties =
     'accentColor' | 'alignContent' | 'alignItems' | 'alignSelf' | 'all' |
     'animation' | 'animationDelay' | 'animationDirection' | 'animationDuration' |
@@ -53,4 +47,31 @@ export type CssProperties =
 
 export type CssPropertiesBook = {
     [K in CssProperties]?: string
+}
+export type Book<T> = { [index: string]: T }
+export type BeeAttributes = { replace?: Book<string>, ref?: string } | Book<string>
+export type BeeLocation = 'before' | 'after' | 'start' | 'end'
+export type BeeEvents = 'click' | 'mousemove' | 'mouseover' | 'onload' | 'input' | 'change'
+export type BeeMeta = {
+    tag: string | null
+    id: string | null
+    ref: string | null
+    class: string[] | null
+}
+export type BeeFetchOptions = {
+    method?: string
+    headers?: { [index: string]: string }
+    data?: { [index: string]: any },
+    on?: {
+        query: string
+        event: string
+    }
+    phrase?: string,
+    res?: (response) => { [index: string]: any } | void
+}
+export type BeeEventCallback = {
+    item: HTMLElement,
+    event: Event,
+    worker: { [index: string]: Function },
+    ref: { [index: string]: HTMLElement }
 }
