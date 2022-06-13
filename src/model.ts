@@ -5,14 +5,9 @@ const blog_style = (): Hive => {
     .style('hr', { border: 'solid #1e2124 1.75px', background: '#1e2124', borderRadius: '10px' })
     .style('body', { margin: '0px' })
 
-  hive.add('', 'link', { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/monokai.min.css' })
-  // hive.add(`@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400&display=swap');
-  //   body{font-family: 'Montserrat', sans-serif;}`, 'style')
   hive.style('body,button', {
     fontFamily: 'ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace',
   })
-  hive.add('', 'script', { src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js' })
-  hive.add('hljs.initHighlightingOnLoad()', 'script')
 
   hive.style('::-webkit-scrollbar', { width: '7.5px', height: '7.5px' })
   hive.style('::-webkit-scrollbar-track', { background: '#f1f1f1', borderRadius: '2px' })
@@ -30,19 +25,19 @@ const blog_style = (): Hive => {
   })
   hive.style('pre:hover', { opacity: '0.9' })
   hive.style('li', {
-    margin: '10px'
+    margin: '10px',
   })
 
   hive.style('.site_blog', {
     width: '100%',
     display: 'flex',
-    justifyContent: 'space-around'
+    justifyContent: 'space-around',
   })
   hive.style('.center_blog', {
     position: 'absolute',
     top: '50px',
     width: '80%',
-    margin: 'auto'
+    margin: 'auto',
   })
   hive.style('.pre_block_blog', {
     padding: '3px',
@@ -50,10 +45,10 @@ const blog_style = (): Hive => {
     paddingRight: '4.5px',
     borderRadius: '3px',
     color: 'white',
-    background: '#0f0f12'
+    background: '#0f0f12',
   })
   hive.style('.pointer_blog', {
-    cursor: 'pointer'
+    cursor: 'pointer',
   })
   hive.style('.noselect_blog', {
     '-webkit-touch-callout': 'none',
@@ -61,7 +56,7 @@ const blog_style = (): Hive => {
     '-khtml-user-select': 'none',
     '-moz-user-select': 'none',
     '-ms-user-select': 'none',
-    userSelect: 'none'
+    'userSelect': 'none',
   })
   hive.style('select', {
     outline: 'none',
@@ -74,10 +69,10 @@ const blog_style = (): Hive => {
     appearance: 'none',
     cursor: 'pointer',
     background: '#d8d8d8',
-    transition: 'opacity 0.1s ease'
+    transition: 'opacity 0.1s ease',
   })
   hive.style('select:hover', {
-    opacity: '0.8'
+    opacity: '0.8',
   })
   hive.style('blockquote', {
     padding: '3px',
@@ -85,23 +80,54 @@ const blog_style = (): Hive => {
     paddingLeft: '25px',
     paddingRight: '4.5px',
     borderRadius: '2px',
-    borderLeft: 'solid #1e2124 3px'
+    borderLeft: 'solid #1e2124 3px',
   })
   hive.style('button', {
     outline: 'none',
     textDecoration: 'none',
     border: 'none',
     cursor: 'pointer',
-    transition: 'opacity 0.1s ease'
+    transition: 'opacity 0.1s ease',
   })
   hive.style('button:hover', {
-    opacity: '0.8'
+    opacity: '0.8',
   })
   hive.style('button:active', {
     opacity: '0.2',
   })
   return hive
 }
+
+const std_libs = (...args: string[]) => {
+  const hive = new Hive('libs')
+  console.log(args)
+  if (args.includes('highlight')) {
+    hive.add('', 'link',
+      { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/monokai.min.css' }
+    )
+    hive.add('', 'script', { src: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js' })
+    hive.add('hljs.initHighlightingOnLoad()', 'script')
+    hive.script({
+      _highlight() { return eval('hljs') }
+    })
+  }
+  if (args.includes('crypto')) {
+    hive.add('', 'script', { src: 'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js' })
+    hive.script({
+      _crypto() { return eval('CryptoJS') }
+    })
+  }
+  if (args.includes('axios')) {
+    hive.add('', 'script', { src: 'https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js' })
+    hive.script({
+      _axios() { return eval('axios') }
+    })
+  }
+
+  return hive
+}
+
 export const bee_package: { [index: string]: any } = {
-  blog_style
+  blog_style,
+  std_libs
 }

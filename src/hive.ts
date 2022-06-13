@@ -1,7 +1,7 @@
-import { randomBytes } from "crypto"
-import { BeeLocation, CssPropertiesBook, BeeAttributes, BeeEventCallback, BeeEvents, BeeFetchOptions, BeeMeta, Book } from "./d"
+import { randomBytes } from 'crypto'
+import { BeeLocation, CssPropertiesBook, BeeAttributes, BeeEventCallback, BeeEvents, BeeFetchOptions, BeeMeta, Book } from './d'
 import { block_attributes, change_to_css_style, extract_meta, get_content, regex } from './utils'
-import { bee_package } from "./model"
+import { bee_package } from './model'
 
 
 export class Bee {
@@ -22,7 +22,8 @@ export class Bee {
         this.replace = this.attributes?.replace as unknown as Book<string>
     }
     query(token: boolean = true) {
-        return `${this.meta.tag}${this.meta?.id ? '#' + this.meta.id : ''}${this.meta?.class ? '.' + this.meta.class.join('.') : ''}${token ? `[v-${this.token}] ` : ''}`
+        return `${this.meta.tag}${this.meta?.id ? '#' + this.meta.id : ''}${this.meta?.class ? '.'
+            + this.meta.class.join('.') : ''}${token ? `[v-${this.token}] ` : ''}`
     }
     set_replace(obj: Book<string>) {
         this.replace = { ...this.replace, ...obj }
@@ -57,10 +58,12 @@ export class Bee {
             location[item.location].push(item)
         }
         const location_bee = (location_type: BeeLocation) => {
-            return location[location_type].map(item => { item.set_replace(this.replace); return item.to_bee_html(remove_useless_replace) }).join(' ')
+            return location[location_type]
+                .map(item => { item.set_replace(this.replace); return item.to_bee_html(remove_useless_replace) }).join(' ')
         }
         this.content = this.to_replace(this.content, remove_useless_replace)
-        const base = `${location_bee('before')}<${this.meta.tag} v-${this.token} ${this.set_attributes().join(' ')} >${location_bee('start')}`
+        const base = `${location_bee('before')}<${this.meta.tag} v-${this.token} `
+            + `${this.set_attributes().join(' ')} >${location_bee('start')}`
             + `${!['script', 'style'].includes(this.meta.tag) ? get_content(this.content) : this.content}${location_bee('end')}`
             + `</${this.meta.tag} v-${this.token}>${location_bee('after')}`
         return base
@@ -89,8 +92,10 @@ export class Bee {
                 new_bee = construct_bee.copy()
             this.iterate((component) => {
                 component.content = component.content.replaceAll(regex.for, (match, p1) => replacer(match, p1, item))
-                component.meta = JSON.parse(JSON.stringify(component.meta).replaceAll(regex.for, (match, p1) => replacer(match, p1, item)))
-                component.attributes = JSON.parse(JSON.stringify(component.attributes).replaceAll(regex.for, (match, p1) => replacer(match, p1, item)))
+                component.meta = JSON.parse(JSON.stringify(component.meta)
+                    .replaceAll(regex.for, (match, p1) => replacer(match, p1, item)))
+                component.attributes = JSON.parse(JSON.stringify(component.attributes)
+                    .replaceAll(regex.for, (match, p1) => replacer(match, p1, item)))
             }, new_bee)
 
             if (index != 0)
@@ -127,10 +132,11 @@ export class Bee {
         this.bee_script.push(bee_script)
         return this
     }
-    wrap(meta?, location: BeeLocation = 'end') {
+    wrap(meta?, attributes: BeeAttributes = {}, location: BeeLocation = 'end') {
         const copy = this.copy()
         copy.location = location
         this.meta = typeof meta == 'string' ? extract_meta(meta) : meta
+        this.attributes = attributes || {}
         this.children = [copy]
         this.content = ''
         return this
@@ -179,7 +185,7 @@ export class Bee {
         return this
     }
     click(callback: ({ item, event, worker, ref }: BeeEventCallback) => void, query: string = '') {
-        this.event("click", callback, query)
+        this.event('click', callback, query)
         return this
     }
     copy() {
@@ -214,8 +220,8 @@ export class Hive {
     private bee_styles: Bee[] = []
     private bee_scripts: Bee[] = []
     private bee_style: Bee = new Bee('', 'style')
-    private bee_script: Bee = new Bee(``, 'script')
-    private bee_event: Bee = new Bee(``, 'script')
+    private bee_script: Bee = new Bee('', 'script')
+    private bee_event: Bee = new Bee('', 'script')
     private bee_script_aggregator: string[] = []
     constructor(name: string) {
         this.name = name
@@ -229,8 +235,8 @@ export class Hive {
         this.push(bee)
         return bee
     }
-    add_package(name: string) {
-        const pcg = bee_package[name]()
+    add_package(name: string, ...args: string[]) {
+        const pcg = bee_package[name](...args)
         this.bees.push(...pcg.bees)
         this.bee_scripts.push(...pcg.bee_scripts)
         this.bee_styles.push(...pcg.bee_styles)
@@ -290,7 +296,9 @@ export class Hive {
         })
     }
     hive_html(to_replace: Book<string> = {}, clear_replaces: boolean = true) {
-        this.bee_script.content = `const worker_bee_hive = {hive_${this.name}: {${this.bee_script_aggregator.join(',')}}, hive_${this.name}_ref: {}}`
+        this.bee_script.content = `const worker_bee_hive = {hive_${this.name}: `
+            + `{${this.bee_script_aggregator.join(',')}}, hive_${this.name}_ref: {}}`
+
         this.bee_script.attributes['worker'] = `hive_${this.name}`
 
         this.separate_scripts()

@@ -13,7 +13,7 @@ module.exports = {
   'rules': {
     'no-unused-vars': 0,
     'require-jsdoc': 0,
-    'max-len': ['error', {'code': 100, 'tabWidth': 4}],
+    'max-len': ['error', { 'code': 130, 'tabWidth': 4 }],
     'semi': ['error', 'never'],
     'quotes': ['error', 'single'],
     'linebreak-style': 0,
