@@ -1,7 +1,11 @@
 import { randomBytes } from 'crypto'
-import { BeeLocation, CssPropertiesBook, BeeAttributes, BeeEventCallback, BeeEvents, BeeFetchOptions, BeeMeta, Book } from './d'
-import { block_attributes, change_to_css_style, extract_meta, get_content, regex } from './utils'
+import {
+    BeeLocation, CssPropertiesBook, BeeAttributes, BeeEventCallback,
+    BeeEvents, BeeFetchOptions, BeeMeta, Book, HiveConfiguration
+} from './d'
+import { block_attributes, change_to_css_style, default_config, extract_meta, get_content, regex } from './utils'
 import { bee_package } from './model'
+
 
 
 export class Bee {
@@ -217,14 +221,16 @@ export class Hive {
     name: string
     html: string[]
     bees: Bee[] = []
+    config: HiveConfiguration
     private bee_styles: Bee[] = []
     private bee_scripts: Bee[] = []
     private bee_style: Bee = new Bee('', 'style')
     private bee_script: Bee = new Bee('', 'script')
     private bee_event: Bee = new Bee('', 'script')
     private bee_script_aggregator: string[] = []
-    constructor(name: string) {
+    constructor(name: string, config: HiveConfiguration = {}) {
         this.name = name
+        this.config = { ...config, ...default_config }
 
         this.bee_styles.push(this.bee_style)
         this.bee_scripts.push(this.bee_script)
@@ -295,6 +301,11 @@ export class Hive {
                 this.bee_styles.push(...bee.bee_style)
         })
     }
+    template_size() {
+        if (this.html)
+            return this.html.map(item => { return Buffer.byteLength(item) })
+        return undefined
+    }
     hive_html(to_replace: Book<string> = {}, clear_replaces: boolean = true) {
         this.bee_script.content = `const worker_bee_hive = {hive_${this.name}: `
             + `{${this.bee_script_aggregator.join(',')}}, hive_${this.name}_ref: {}}`
@@ -322,3 +333,6 @@ export class Hive {
             this.html[0] + html.replaceAll(/(?<!\\)>{\s*[\S\s]*\s*}/gm, '') + this.html[2] : this.html.join('')
     }
 }
+
+
+// Add Config for example for placeholders in scheme

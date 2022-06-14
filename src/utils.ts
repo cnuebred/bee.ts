@@ -30,15 +30,17 @@ export const regex_shorts = {
         return content.replaceAll(regex.shorts.header, `<h${type_number}>$2</h${type_number}>`)
     },
     hr: (match, content) => {
-        return content.replaceAll(regex.shorts.hr, `<hr>`)
+        return content.replaceAll(regex.shorts.hr, '<hr>')
     },
     blockquote: (match, content) => {
-        return content.replaceAll(regex.shorts.blockquote, `<blockquote>$2</blockquote>`)
+        return content.replaceAll(regex.shorts.blockquote, '<blockquote>$2</blockquote>')
     }
 }
 export const block_attributes = ['replace']
 
+export const default_config = {
 
+}
 
 export const extract_meta = (meta: string) => {
     const regex_meta = meta.matchAll(regex.meta).next().value

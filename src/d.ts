@@ -75,3 +75,6 @@ export type BeeEventCallback = {
     worker: { [index: string]: Function },
     ref: { [index: string]: HTMLElement }
 }
+export type HiveConfiguration = {
+
+}
