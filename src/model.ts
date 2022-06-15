@@ -100,7 +100,6 @@ const blog_style = (): Hive => {
 
 const std_libs = (...args: string[]) => {
   const hive = new Hive('libs')
-  console.log(args)
   if (args.includes('highlight')) {
     hive.add('', 'link',
       { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/monokai.min.css' }

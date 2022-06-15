@@ -107,24 +107,28 @@ export class Bee {
         })
         return this
     }
-    fetch(url: string, options: BeeFetchOptions, query: string = '', worker_bee_hive?) {
+    fetch(url: string, options: BeeFetchOptions, query: string = '', worker_bee_hive?) {// only for api json
         const foo = async (url, token, options, res) => {
             const element = document.querySelector(token)
             await fetch(url, {
                 method: options?.method || 'get',
                 headers: options?.headers || {},
-                body: options?.data ? JSON.stringify(options?.data) : null
+                body: options?.data ? JSON.stringify(options?.data) : null,
+                mode: options?.cors || 'cors',
             })
-                .then(response => response.json())
+                .then(response => {
+                    return options?.type_data == 'text' ? response.text() : response.json()
+                })
                 .then(result => {
                     const pcg = res(result)
                     if (pcg) {
-                        element.innerHTML = element.innerHTML.replaceAll(/(?<!\/)@(\w+)/gm, (p, _1) => { return pcg[_1] || '' })
+                        element.innerHTML = element.innerHTML
+                            .replaceAll(/(?<!\/)@(\w+)/gm, (p, _1) => { return pcg[_1] || '' })
                         Object.values(element.attributes).forEach((item: Attr) => {
                             item.value = item.value.replaceAll(/(?<!\/)@(\w+)/gm, (p, _1) => { return pcg[_1] || '' })
                         })
                     }
-                })
+                }).catch(err => { console.log(err) })
         }
         let script = `(${foo.toString()})
         ('${url}', '>{query_bee_script}', ${JSON.stringify(options)}, ${options.res.toString()})`
@@ -132,8 +136,27 @@ export class Bee {
             script = `document.querySelector('${options.on.query}').addEventListener('${options.on.event}', () => {${script}})`
         }
         const bee_script = new Bee(script, 'script')
-        bee_script.set_replace({ query_bee_script: `[v-${this.token}]${query ? ' ' + query : query}` })
+        bee_script.set_replace({
+            query_bee_script: `[v-${this.token}]${query ? ' ' + query : query}`
+            , ...(options?.replacer || {})
+        })
         this.bee_script.push(bee_script)
+        return this
+    }
+    gist(address, file) {
+        this.fetch(`https://api.github.com/gists/${address}`, {
+            replacer: { _file_: file },
+            res: (result) => {
+                const file_pcg = result.files['>{_file_}']
+                return {
+                    _gist_: file_pcg?.content
+                        .replaceAll(/\</gm, '&lt;')
+                        .replaceAll(/\>/gm, '&gt;')
+                        .replaceAll(/ /gm, '&nbsp;')
+                        .replaceAll(/\n/gm, '<br>') || ''
+                }
+            }
+        })
         return this
     }
     wrap(meta?, attributes: BeeAttributes = {}, location: BeeLocation = 'end') {

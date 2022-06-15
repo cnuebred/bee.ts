@@ -67,6 +67,9 @@ export type BeeFetchOptions = {
         event: string
     }
     phrase?: string,
+    type_data?: 'json' | 'text'
+    cors?: string
+    replacer?: Book<string>
     res?: (response) => { [index: string]: any } | void
 }
 export type BeeEventCallback = {
