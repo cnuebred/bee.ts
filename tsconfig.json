@@ -3,10 +3,11 @@
         "declaration": true,
         "target": "ES2021",
         "experimentalDecorators": true,
+        "incremental": true,
         "module": "commonjs",
         "moduleResolution": "node",
         "esModuleInterop": true,
-        "sourceMap": false,
+        "sourceMap": true,
         "rootDir": "./src",
         "outDir": "./build"
     },

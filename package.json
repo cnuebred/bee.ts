@@ -1,9 +1,9 @@
 {
     "name": "bee.ts",
-    "version": "1.1.6",
-    "description": "",
-    "main": "build/hive.js",
-    "types": "build/hive.d.ts",
+    "version": "1.1.8",
+    "description": "little node.js package to create simple front for backend api",
+    "main": "build/index.js",
+    "types": "build/index.d.ts",
     "files": [
         "build"
     ],
@@ -17,6 +17,16 @@
         "type": "git",
         "url": "git+https://github.com/cnuebred/bee.ts.git"
     },
+    "keywords": [
+        "front",
+        "bee",
+        "hive",
+        "api",
+        "html",
+        "module",
+        "node",
+        "minimal"
+    ],
     "author": "cnuebred",
     "license": "ISC",
     "bugs": {
@@ -24,7 +34,6 @@
     },
     "homepage": "https://github.com/cnuebred/bee.ts#readme",
     "dependencies": {
-        "@types/ws": "^8.5.3",
         "axios": "^0.27.2",
         "crypto": "^1.0.1",
         "fs": "^0.0.1-security",
