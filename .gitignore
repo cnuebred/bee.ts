@@ -3,4 +3,3 @@ node_modules
 index.html
 src/app.ts
 build
-app.js

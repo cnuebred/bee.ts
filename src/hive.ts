@@ -1,245 +1,8 @@
-import { randomBytes } from 'crypto'
-import {
-    BeeLocation, CssPropertiesBook, BeeAttributes, BeeEventCallback,
-    BeeEvents, BeeFetchOptions, BeeMeta, Book, HiveConfiguration
-} from './d'
-import { block_attributes, change_to_css_style, default_config, extract_meta, get_content, regex } from './utils'
+import { Bee } from './bee'
+import { Book, CssPropertiesBook, HiveConfiguration } from './d'
 import { bee_package } from './model'
+import { default_config, change_to_css_style } from './utils'
 
-
-
-export class Bee {
-    readonly token: string
-    content: string
-    location?: BeeLocation
-    children: Bee[] = []
-    attributes: BeeAttributes
-    private replace: Book<string> = {}
-    meta: BeeMeta
-    bee_style: Bee[] = []
-    bee_script: Bee[] = []
-    constructor(content: string = '', meta: string | BeeMeta = '', attributes: BeeAttributes = {}) {
-        this.token = randomBytes(4).toString('hex')
-        this.meta = typeof meta == 'string' ? extract_meta(meta) : meta
-        this.content = content
-        this.attributes = attributes
-        this.replace = this.attributes?.replace as unknown as Book<string>
-    }
-    query(token: boolean = true) {
-        return `${this.meta.tag}${this.meta?.id ? '#' + this.meta.id : ''}${this.meta?.class ? '.'
-            + this.meta.class.join('.') : ''}${token ? `[v-${this.token}] ` : ''}`
-    }
-    set_replace(obj: Book<string>) {
-        this.replace = { ...this.replace, ...obj }
-        return this
-    }
-    set_attributes() {
-        let attributes: string[] = []
-        attributes.push(this.meta?.id ? `id="${this.meta.id}"` : '')
-        attributes.push(this.meta?.ref ? `ref="${this.meta.ref}"` : '')
-        attributes.push(this.meta?.class && this.meta?.class.length != 0 ? `class="${this.meta.class.join(' ')}"` : '')
-        Object.entries(this.attributes).forEach(([key, value]) => {
-            if (!block_attributes.includes(key))
-                attributes.push(`${key}="${value}"`)
-        })
-        return attributes
-    }
-    private to_replace(content: string, remove_useless_replace: boolean = true) {
-        if (!this.replace) return remove_useless_replace ? content.replaceAll(/(?<!\\)>{\s*[\S\s]*\s*}/gm, '') : content
-        Object.entries(this.replace).forEach(([key, value]) => {
-            content = content.replaceAll(new RegExp(`(?<!\\\\)>{\\s*${key}\\s*}`, 'gm'), value)
-        })
-        return remove_useless_replace ? content.replaceAll(/(?<!\\)>{\s*[\S\s]*\s*}/gm, '') : content
-    }
-    to_bee_html(remove_useless_replace: boolean = true) {
-        const location: { [index: string]: Bee[] } = {
-            before: [],
-            after: [],
-            start: [],
-            end: [],
-        }
-        for (const item of this.children) {
-            location[item.location].push(item)
-        }
-        const location_bee = (location_type: BeeLocation) => {
-            return location[location_type]
-                .map(item => { item.set_replace(this.replace); return item.to_bee_html(remove_useless_replace) }).join(' ')
-        }
-        this.content = this.to_replace(this.content, remove_useless_replace)
-        const base = `${location_bee('before')}<${this.meta.tag} v-${this.token} `
-            + `${this.set_attributes().join(' ')} >${location_bee('start')}`
-            + `${!['script', 'style'].includes(this.meta.tag) ? get_content(this.content) : this.content}${location_bee('end')}`
-            + `</${this.meta.tag} v-${this.token}>${location_bee('after')}`
-        return base
-    }
-    iterate(callback: (item: Bee) => void, iterator: Bee = this) {
-        callback(iterator)
-        const iterator_main = ([...iterator.children, ...iterator.bee_script]).forEach(item => {
-            if (item.children.length != 0 || item.bee_script.length != 0)
-                this.iterate(callback, item)
-            else callback(item)
-        })
-    }
-    for(iterator: string[] | string[][], location: BeeLocation = 'after') {// TODO add for options
-        const replacer = (match, p1, item) => {
-            if (Array.isArray(item)) return item[p1] || ''
-            return item || ''
-        }
-
-        const construct_bee = this.copy()
-
-        iterator.forEach((item, index) => {
-            let new_bee: Bee
-            if (index == 0)
-                new_bee = this
-            else
-                new_bee = construct_bee.copy()
-            this.iterate((component) => {
-                component.content = component.content.replaceAll(regex.for, (match, p1) => replacer(match, p1, item))
-                component.meta = JSON.parse(JSON.stringify(component.meta)
-                    .replaceAll(regex.for, (match, p1) => replacer(match, p1, item)))
-                component.attributes = JSON.parse(JSON.stringify(component.attributes)
-                    .replaceAll(regex.for, (match, p1) => replacer(match, p1, item)))
-            }, new_bee)
-
-            if (index != 0)
-                this.push(new_bee, location)
-        })
-        return this
-    }
-    fetch(url: string, options: BeeFetchOptions, query: string = '', worker_bee_hive?) {// only for api json
-        const foo = async (url, token, options, res) => {
-            const element = document.querySelector(token)
-            await fetch(url, {
-                method: options?.method || 'get',
-                headers: options?.headers || {},
-                body: options?.data ? JSON.stringify(options?.data) : null,
-                mode: options?.cors || 'cors',
-            })
-                .then(response => {
-                    return options?.type_data == 'text' ? response.text() : response.json()
-                })
-                .then(result => {
-                    const pcg = res(result)
-                    if (pcg) {
-                        element.innerHTML = element.innerHTML
-                            .replaceAll(/(?<!\/)@(\w+)/gm, (p, _1) => { return pcg[_1] || '' })
-                        Object.values(element.attributes).forEach((item: Attr) => {
-                            item.value = item.value.replaceAll(/(?<!\/)@(\w+)/gm, (p, _1) => { return pcg[_1] || '' })
-                        })
-                    }
-                }).catch(err => { console.log(err) })
-        }
-        let script = `(${foo.toString()})
-        ('${url}', '>{query_bee_script}', ${JSON.stringify(options)}, ${options.res.toString()})`
-        if (options?.on) {
-            script = `document.querySelector('${options.on.query}').addEventListener('${options.on.event}', () => {${script}})`
-        }
-        const bee_script = new Bee(script, 'script')
-        bee_script.set_replace({
-            query_bee_script: `[v-${this.token}]${query ? ' ' + query : query}`
-            , ...(options?.replacer || {})
-        })
-        this.bee_script.push(bee_script)
-        return this
-    }
-    gist(address, file) {
-        this.fetch(`https://api.github.com/gists/${address}`, {
-            replacer: { _file_: file },
-            res: (result) => {
-                const file_pcg = result.files['>{_file_}']
-                return {
-                    _gist_: file_pcg?.content
-                        .replaceAll(/\</gm, '&lt;')
-                        .replaceAll(/\>/gm, '&gt;')
-                        .replaceAll(/ /gm, '&nbsp;')
-                        .replaceAll(/\n/gm, '<br>') || ''
-                }
-            }
-        })
-        return this
-    }
-    wrap(meta?, attributes: BeeAttributes = {}, location: BeeLocation = 'end') {
-        const copy = this.copy()
-        copy.location = location
-        this.meta = typeof meta == 'string' ? extract_meta(meta) : meta
-        this.attributes = attributes || {}
-        this.children = [copy]
-        this.content = ''
-        return this
-    }
-    add(content?: string, meta?: string | BeeMeta, attributes?: BeeAttributes, location: BeeLocation = 'end') {
-        const bee = new Bee(content, meta, attributes)
-        this.push(bee, location)
-        return bee
-    }
-    push(bee: Bee | Bee[], location: BeeLocation = 'after') {
-        bee = Array.isArray(bee) ? bee : [bee]
-        bee.forEach(item => item.location = location)
-        this.children.push(...Array.isArray(bee) ? bee : [bee])
-        return this
-    }
-    event(
-        event: BeeEvents,
-        callback: ({ item, event, worker, ref }: BeeEventCallback) => void,
-        query: string = ''
-        , worker_bee_hive?
-    ) {
-        const foo = (event, token, callback) => {
-            const items = document.querySelectorAll(token)
-            const worker = worker_bee_hive[document.querySelector('script[worker]').getAttribute('worker')]
-            const ref = worker_bee_hive[document.querySelector('script[worker]').getAttribute('worker') + '_ref']
-            items.forEach(item => {
-                item.addEventListener(event, (event) => {
-                    callback({ item, event, worker, ref })
-                })
-            })
-        }
-
-        const script = new Bee(`(${foo.toString()})('${event}', '>{query_bee_script}' , ${callback.toString()})`, 'script')
-        script.set_replace({ query_bee_script: `[v-${this.token}]${query ? ' ' + query : query}` })
-        this.bee_script.push(script)
-        return this
-    }
-    style(query: string, style: CssPropertiesBook, single: boolean = true) {
-        let style_pcg = ''
-        Object.entries(style).forEach(([key, value]) => {
-            style_pcg += `${change_to_css_style(key)}: ${value};`
-        })
-        const bee_style = new Bee('>{query_bee_style} ' + query + `{${style_pcg}}`, 'style')
-        bee_style.set_replace({ query_bee_style: this.query(single) })
-        this.bee_style.push(bee_style)
-        return this
-    }
-    click(callback: ({ item, event, worker, ref }: BeeEventCallback) => void, query: string = '') {
-        this.event('click', callback, query)
-        return this
-    }
-    copy() {
-        const bee = new Bee(this.content, this.meta, this.attributes)
-        bee.location = this.location
-
-        bee.replace = this.replace
-
-        if (this.bee_script.length != 0)
-            bee.bee_script = this.bee_script.map(item => {
-                const new_script = item.copy()
-                return new_script
-                    .set_replace(
-                        { query_bee_script: new_script.replace.query_bee_script.replace(/\[v-\w+\]/gm, `[v-${bee.token}]`) })
-            })
-        if (this.bee_style.length != 0)
-            bee.bee_style = this.bee_style.map(item => {
-                const new_style = item.copy()
-                return new_style
-                    .set_replace(
-                        { query_bee_style: new_style.replace.query_bee_style.replace(/\[v-\w+\]/gm, `[v-${bee.token}]`) })
-            })
-        if (this.children.length != 0)
-            bee.children = this.children.map(item => { return item.copy() })
-        return bee
-    }
-}
 export class Hive {
     name: string
     html: string[]
@@ -257,66 +20,71 @@ export class Hive {
 
         this.bee_styles.push(this.bee_style)
         this.bee_scripts.push(this.bee_script)
-        this.bee_scripts.push(this.bee_event)
+        // this.bee_scripts.push(this.bee_event)
     }
-    add(content?, meta?, attributes?) {
-        const bee = new Bee(content, meta, attributes)
+    add(content?, meta?, attributes?): Bee {
+        const bee: Bee = new Bee(content, meta, attributes)
         this.push(bee)
         return bee
     }
-    add_package(name: string, ...args: string[]) {
-        const pcg = bee_package[name](...args)
+    add_package(direct_pcg: string | Hive, ...args: string[]): Hive {
+        const pcg: Hive = typeof (direct_pcg) == 'string' ? bee_package[direct_pcg](...args) : direct_pcg
         this.bees.push(...pcg.bees)
         this.bee_scripts.push(...pcg.bee_scripts)
         this.bee_styles.push(...pcg.bee_styles)
         this.bee_script_aggregator.push(...pcg.bee_script_aggregator)
+        return pcg
     }
-    push(bee: Bee | Bee[]) {
-        bee = Array.isArray(bee) ? bee : [bee]
-        bee.forEach(bee => {
-            if (bee.meta.tag == 'script')
-                this.bee_scripts.push(bee)
-            else if (bee.meta.tag == 'style')
-                this.bee_style.push(bee)
+    push(bee: Bee | Bee[]): Hive {
+        const bee_array: Bee[] = Array.isArray(bee) ? bee : [bee]
+        bee_array.forEach(bee => {
+            if (bee.meta.tag == 'script') this.bee_scripts.push(bee)
+            else if (bee.meta.tag == 'style') this.bee_style.push(bee)
             else this.bees.push(bee)
         })
         return this
     }
-    style(query: string, style: CssPropertiesBook) {
-        let style_pcg = ''
+    style(query: string, style: CssPropertiesBook): Hive {
+        let style_pcg: string = ''
         Object.entries(style).forEach(([key, value]) => {
             style_pcg += `${change_to_css_style(key)}: ${value};`
         })
         this.bee_style.content += query + `{${style_pcg}}`
         return this
     }
-    script = (script: { [index: string]: Function }) => {
+    script(script: { [index: string]: any }): Hive {
         Object.entries(script).forEach(([key, value]) => {
-            const foo_string = value.toString()
-            if (foo_string.startsWith('('))
-                this.bee_script_aggregator.push(`${key}:${value.toString()}`)
+            if (typeof value == 'function') {
+                const foo_string: string = value.toString()
+                if (foo_string.startsWith('('))
+                    this.bee_script_aggregator.push(`${key}:${foo_string}`)
+                else
+                    this.bee_script_aggregator.push(`${foo_string}`)
+            }
             else
-                this.bee_script_aggregator.push(`${value.toString()}`)
+                return this.bee_script_aggregator.push(`${key}:${JSON.stringify(value)}`)
         })
         return this
     }
-    private ref(worker_bee_hive?) {
-        const foo = () => {
+    private set_reference_script() {
+        let worker_bee_hive: any
+        const foo = async () => {
             const refs = document.querySelectorAll('[ref]')
             const worker_ref = worker_bee_hive[document.querySelector('script[worker]').getAttribute('worker') + '_ref']
             const worker_ = worker_bee_hive[document.querySelector('script[worker]').getAttribute('worker')]
             refs.forEach(item => {
                 worker_ref[item.getAttribute('ref')] = item
             })
-            Object.entries(worker_).forEach(([key, value]) => {
+            Object.keys(worker_).forEach(async (key) => {
                 if (key.startsWith('onload_'))
-                    (value as Function)()
+                    await (worker_[key] as Function)()
             })
         }
-        this.bee_event.content = `window.onload = () => {(${foo.toString()})()}`
+        this.bee_event.content = `(${foo.toString()})()`
+        this.bee_scripts.push(this.bee_event)
     }
     private separate_scripts(group: Bee[] = this.bees) {
-        group.forEach((bee, index) => {
+        group.forEach(bee => {
             if (bee.children.length != 0) this.separate_scripts(bee.children)
             if (bee.bee_script.length != 0)
                 this.bee_scripts.push(...bee.bee_script)
@@ -336,24 +104,30 @@ export class Hive {
         this.bee_script.attributes['worker'] = `hive_${this.name}`
 
         this.separate_scripts()
-        this.ref()
+        this.set_reference_script()
         this.html = [this.bee_styles, this.bees, this.bee_scripts].map(item => item.map(bee => {
+            if (bee.content.length == 0 && Object.keys(bee.attributes).length == 0 && bee.children.length == 0)
+                return
+            if (bee.meta.tag == 'script' && bee.content.length != 0)
+                bee.set_attributes('defer', '')
+
             bee.set_replace(to_replace)
             return bee.to_bee_html(clear_replaces)
         }).join(''))
 
         return this.html.join('')
     }
-    to_html(to_replace: Book<string> = {}, remove_useless_replace: boolean = true) {
-        let html = this.html[1]
+    template(to_replace: Book<string> = {}, remove_useless_replace: boolean = true): string {
+        let scheme = JSON.parse(JSON.stringify(this.html))
         if (!to_replace) return remove_useless_replace ?
-            this.html[0] + html.replaceAll(/(?<!\\)>{\s*[\S\s]*\s*}/gm, '') + this.html[2] : this.html.join('')
+            scheme.map(item => { return item.replaceAll(/(?<!\\)>{{\s*[\S\s]*?\s*}}/gm, '') }).join('') : scheme.join('')
 
         Object.entries(to_replace).forEach(([key, value]) => {
-            html = html.replaceAll(new RegExp(`(?<!\\\\)>{\\s*${key}\\s*}`, 'gm'), value)
+            scheme = scheme.map(item => { return item.replaceAll(new RegExp(`(?<!\\\\)>{{\\s*${key}\\s*}}`, 'gm'), value) })
         })
+
         return remove_useless_replace ?
-            this.html[0] + html.replaceAll(/(?<!\\)>{\s*[\S\s]*\s*}/gm, '') + this.html[2] : this.html.join('')
+            scheme.map(item => { return item.replaceAll(/(?<!\\)>{{\s*[\S\s]*?\s*}}/gm, '') }).join('') : scheme.join('')
     }
 }
 

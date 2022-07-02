@@ -1,4 +1,4 @@
-import { Bee, Hive } from './hive'
+import { Hive } from './hive'
 
 const blog_style = (): Hive => {
   const hive = new Hive('blog_style')
@@ -95,10 +95,21 @@ const blog_style = (): Hive => {
   hive.style('button:active', {
     opacity: '0.2',
   })
+  hive.style('table', {
+    borderRadius: '3px',
+    borderCollapse: 'collapse'
+  })
+  hive.style('table tr, table td', {
+    border: '#1e2124 solid 2px',
+    borderRadius: '3px',
+    padding: '5px',
+    paddingLeft: '7px',
+    paddingRight: '7px'
+  })
   return hive
 }
 
-const std_libs = (...args: string[]) => {
+const std_libs = (...args: string[]): Hive => {
   const hive = new Hive('libs')
   if (args.includes('highlight')) {
     hive.add('', 'link',
@@ -126,7 +137,7 @@ const std_libs = (...args: string[]) => {
   return hive
 }
 
-export const bee_package: { [index: string]: any } = {
+export const bee_package: { [index: string]: (...args: string[]) => Hive } = {
   blog_style,
   std_libs
 }

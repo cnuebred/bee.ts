@@ -2,6 +2,8 @@ export const regex = {
     meta: /(^(?<tag>\w+))?(\#(?<id>\w+))?(\.(?<class>([a-zA-Z_@\-0-9.]+)*))?(\$(?<ref>(\w+)*))?/gm,
     for: /(?<!\\)\@(\d+)/gm,
     style_css: /([a-z])([A-Z])/gm,
+    fetch_tags: /(?<!\/)@(\w+)/gm,
+    replacer: /(?<!\\)>{{\s*[\S\s]*?\s*}/gm,
     bee_html: {
         general: /<(?<tag>\w+)?\s+(?<attr>\w+=\"[\S\s]+\")?\s+(?<token>\w+)?>(?<content>[\S\s]+?)<\/\1 \3>/gm,
         attr: /(?<key>\w+)="(?<value>[\S\s]+?)"/gm,
@@ -10,7 +12,7 @@ export const regex = {
         style: /(?<!\\)(?<type>i|b|u|s|sub|sup|mark|code)\((?<content>[\S\s]+?)(?<!\\)\)/gm,
         header: /(?<!\\)(?<type>#{1,3})(?<content>[\s\S]+?)(?<!\\)\1/gm,
         blockquote: /(?<!\\)(?<type>^\>)(?<content>[\s\S]+?)(?<!\\)\</gm,
-        hr: /(?<!\/)^-{3}$/gm,
+        hr: /(?<!\/)^\s*-{3}\s*$/gm,
     }
 }
 export const regex_shorts = {

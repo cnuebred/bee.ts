@@ -51,7 +51,7 @@ export type CssPropertiesBook = {
 export type Book<T> = { [index: string]: T }
 export type BeeAttributes = { replace?: Book<string>, ref?: string } | Book<string>
 export type BeeLocation = 'before' | 'after' | 'start' | 'end'
-export type BeeEvents = 'click' | 'mousemove' | 'mouseover' | 'onload' | 'input' | 'change'
+export type BeeEvents = 'click' | 'mousemove' | 'mouseover' | 'load' | 'input' | 'change' | 'keyup' | 'keydown'
 export type BeeMeta = {
     tag: string | null
     id: string | null
@@ -60,7 +60,7 @@ export type BeeMeta = {
 }
 export type BeeFetchOptions = {
     method?: string
-    headers?: { [index: string]: string }
+    headers?: () => { [index: string]: string }
     data?: { [index: string]: any },
     on?: {
         query: string
@@ -78,6 +78,4 @@ export type BeeEventCallback = {
     worker: { [index: string]: Function },
     ref: { [index: string]: HTMLElement }
 }
-export type HiveConfiguration = {
-
-}
+export type HiveConfiguration = {}
